@@ -1,0 +1,25 @@
+[Hyperparametric]
+project_name = education
+method = resnet34
+train=0
+ckpt=ckpt_best.pth.tar
+#input
+epochs = 200
+batch_size=1
+inp_dim=224
+workers=8
+ckpt=None
+
+learning_rate=1.0e-3
+burn_in=1000
+policy=steps
+lr_decay=500
+lr_gamma=0.98
+max_norm=1
+procrustes=1
+
+#output
+classes=4
+
+[net]
+#moudle structure

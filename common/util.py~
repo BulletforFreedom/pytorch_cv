@@ -1,0 +1,153 @@
+"""
+Created on Tue Aug 14 18:10:46 2018
+
+@author: lvsikai
+
+Email: lyusikai@gmail.com
+"""
+
+import os
+import sys
+import numpy as np
+import cv2 
+import random
+import glob
+
+import torch 
+from torch.autograd import Variable
+
+from common.logger import Logger as log
+
+def unique(tensor1d):
+     temp=[]
+     for x in tensor1d:
+         if len(temp)==0:
+             temp.append(x)
+         else:
+             for y in temp:
+                 if x==y:
+                     break
+                 if y==temp[-1]:
+                     temp.append(x)
+     return temp
+
+
+def load_classes(namesfile):
+    fp = open(namesfile, "r")
+    names = fp.read().split("\n")[:-1]
+    return names
+
+def get_test_input(img_name,inp_dim):
+    img = cv2.imread(img_name)
+    img = cv2.resize(img, (inp_dim,inp_dim)) #Resize to the input dimension
+    img_ = img[:,:,::-1].transpose((2,0,1)) # BGR -> RGB | H X W X C -> C X H X W 
+    img_ = img_[np.newaxis,:,:,:]/255.0 #Add a channel at 0 (for batch) | Normalise
+    img_ = torch.from_numpy(img_).float() #Convert to float
+    img_ = Variable(img_) # Convert to Variable
+    return img_
+
+def plot_bb(im,bb,cls,inp_dim,textSize=1,textThickness=2):
+    if im.shape[0]==3:
+        im=im.transpose(1,2,0)
+    h,w,c = im.shape
+    for idx,box in enumerate(bb):
+        
+        x1 = int(max([0, (box[0]/inp_dim)*w ]))
+        x2 = int(min([w, (box[2]/inp_dim)*w ]))
+        y1 = int(max([0, (box[1]/inp_dim)*h ]))
+        y2 = int(min([h, (box[3]/inp_dim)*h ]))
+
+        cv2.rectangle(im,(x1,y1),(x2,y2),(0,0,255),1)
+        cv2.putText(im,
+                    '%s'%(cls[idx]),
+                    (x1,int(y1*1.1)),
+                    cv2.FONT_HERSHEY_SIMPLEX,textSize,
+                    (0,200,255),
+                    thickness=textThickness) 
+    return im
+
+def random_resize_image(original_img_size, strides):
+    amplitude = original_img_size // 32 -5         
+    new_size = (random.randint(0,9) + amplitude) * strides
+    return new_size
+        
+# ################################
+# Format Change
+# ################################
+def convert_bb_format(boxes):
+    '''from (cx,cy,w,h)-->(x1,y1,x2,y2)
+
+    :param boxes:
+    :return:
+    '''
+    new_boxes = []
+
+    for box in boxes:
+        b_w = box[2]
+        b_h = box[3]
+        c_x = box[0]
+        c_y = box[1]
+
+        x1 = (max([0., (c_x - 0.5 * b_w)]))
+        x2 = (min([1., (c_x + 0.5 * b_w)]))
+        y1 = (max([0., (c_y - 0.5 * b_h)]))
+        y2 = (min([1., (c_y + 0.5 * b_h)]))
+
+        new_boxes.append(np.array([x1,y1,x2,y2]))
+
+    new_boxes = np.array(new_boxes)
+
+    return new_boxes
+
+def get_file_name_in_dir(in_dir,out_path,suffix='*.jpg'):
+    '''
+    Get the file names in "in_dir"
+
+    :param in_dir: file dir
+    :param out_path: save path
+    :param suffix: file suffix
+    :return: None
+    '''
+    filelist = glob.glob(os.path.join(in_dir, suffix))
+    f = open(out_path,'w')
+    for line in filelist:
+        name = line.split('/')[-1].split('.')[0]
+        f.write(name+'\n')
+    f.close()
+
+    return 0
+
+def get_file_full_path_in_dir(files_dir,out_path,suffix='*.jpg'):
+    '''
+    Get file full path from directory "files_dir"
+
+    :param files_dir:
+    :param out_path:
+    :param suffix:
+    :return:
+    '''
+    filelist = glob.glob(os.path.join(files_dir, suffix))
+    f = open(out_path, 'w')
+    for line in filelist:
+        f.write(line + '\n')
+    f.close()
+
+def balance_lightness(bgr,gridsize=8): #bgr = cv2.imread(in_image_path)
+    lab = cv2.cvtColor(bgr, cv2.COLOR_BGR2LAB)
+    
+    lab_planes = cv2.split(lab)
+    
+    clahe = cv2.createCLAHE(clipLimit=2.0,tileGridSize=(gridsize,gridsize))
+    
+    lab_planes[0] = clahe.apply(lab_planes[0])
+    
+    lab = cv2.merge(lab_planes)
+    
+    bgr = cv2.cvtColor(lab, cv2.COLOR_LAB2BGR)
+    
+    return bgr
+
+
+if __name__ == '__main__':
+    cfgfile='./cfg/yolov3.cfg'
+    print(111)    

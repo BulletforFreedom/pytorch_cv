@@ -1,0 +1,9 @@
+backup/
+*.pyc
+*.jpg
+*.png
+*.jpeg
+*.git
+*.mp4
+*.avi
+*.MOV

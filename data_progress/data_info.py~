@@ -1,0 +1,5 @@
+education={"name_seq": ["read", "nap", "stand_up", "hands_up"],
+           "mean": [0.485, 0.456, 0.406],
+           "std": [0.229, 0.224, 0.225],
+           "data_dir": '/home/lsk/Downloads/pytorch_cv/data'
+}
