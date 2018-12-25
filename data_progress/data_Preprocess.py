@@ -104,7 +104,7 @@ class data_Preprocess(object):
         cv2.destroyAllWindows()
     
     @staticmethod
-    def crop_and_save(img_path, results_path, write_path):
+    def crop_from_image(img_path, results_path, write_path):
         img_dirs=glob.glob(os.path.join(img_path,'*'))
         for img_dir in img_dirs:
             img_name=img_dir.split('/')[-1].split('.')[0]
@@ -133,6 +133,44 @@ class data_Preprocess(object):
         #        cv2.putText(image,('%s'%(int(box2[0])+1)),(int(box1[0])+5,int(box1[1])+30),cv2.FONT_HERSHEY_SIMPLEX,1,(0,200,255),thickness=2)
                 roii = image[array_box1[1]:array_box1[1]+array_box1[3], array_box1[0]:array_box1[0]+array_box1[2]]
                 cv2.imwrite(write_path+'/'+img_name+'_'+str(i)+'.jpg',roii)
+                
+    @staticmethod
+    def select_frame(video_path, write_path, gap, start_frame=0, end_frame=None):
+        video_name=video_path.split('/')[-1].split('.')[0]
+        cap = cv2.VideoCapture(video_path)
+        #cap.set(cv2.CAP_PROP_FPS, 1)
+        video_length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        if end_frame==None:
+            end_frame=video_length
+        ret, frame = cap.read()
+        i=0
+        
+        for i in range(start_frame):
+            ret, frame = cap.read()
+        
+        while ret:
+            frame_name=video_name+'_'+str(i)+' / '+ str(video_length)
+            cv2.imshow(frame_name,frame)
+            #cv2.moveWindow(video_name,10,10)
+            
+            k = cv2.waitKey(0)
+            if k==ord('q'):
+                cv2.destroyAllWindows()
+                break            
+            elif k==ord('s'):
+                cv2.imwrite(write_path+'/'+video_name+'_'+str(i)+'.jpg',frame)
+                cv2.destroyWindow(frame_name)
+            else:
+                cv2.destroyWindow(frame_name)
+            
+            for x in range(gap):
+                ret, frame = cap.read()
+            i+=gap
+            if i>end_frame:
+                break
+            
+        cap.release()
+        cv2.destroyAllWindows()
     
 if __name__=='__main__':
     '''
@@ -140,7 +178,11 @@ if __name__=='__main__':
     dest_path='/home/lsk/Downloads/pytorch_cv/data/education/train_set/None'
     data_Preprocess.cp_images(orig_path, dest_path)
     '''
+    '''    
     data_dir='/home/lsk/Downloads/pytorch_cv/data/education'
     data_Preprocess.label_image(data_dir)
     data_Preprocess.partition_data(data_dir)
-    
+    '''
+    video_path='/home/lsk/Downloads/pytorch_cv/data/education/videos/2.mp4'
+    write_path='/home/lsk/Downloads/pytorch_cv/data/education/frame'
+    data_Preprocess.select_frame(video_path, write_path, 15, 1860)

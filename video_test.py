@@ -58,13 +58,11 @@ if __name__=='__main__':
     tester=Testing(r_cfg, net)
     
     #video
-    video_path='/home/lsk/Downloads/pytorch_cv/data/education/videos/1.MOV'    
+    video_path='/home/lsk/Downloads/pytorch_cv/data/education/videos/5.mp4'    
     cap = cv2.VideoCapture(video_path)
     fourcc = cv2.VideoWriter_fourcc(*'MJPG')    
-    rate = cap.get(1)
+    #rate = cap.get(1)
     ret, frame = cap.read()
-    #size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), 
-            #int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
     h,w,c = frame.shape
     out = cv2.VideoWriter('/home/lsk/Downloads/pytorch_cv/data/education/videos/output.avi',
                           fourcc, 15, (w, h))
@@ -149,7 +147,7 @@ if __name__=='__main__':
         stored_frames.append(frame_info)
         win_name = video_path
         cv2.imshow(win_name,im_gt)
-        out.write(im_gt)
+        #out.write(im_gt)
         ret, frame = cap.read()
         frame_end=time.time()-plot_start
         print('plot_time: {plot_time:.4}ms'
