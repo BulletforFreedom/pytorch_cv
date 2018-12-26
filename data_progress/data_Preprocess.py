@@ -108,6 +108,7 @@ class data_Preprocess(object):
         img_dirs=glob.glob(os.path.join(img_path,'*'))
         for img_dir in img_dirs:
             img_name=img_dir.split('/')[-1].split('.')[0]
+            print(img_name)
             image= cv2.imread(img_dir)
             box = open(os.path.join(results_path ,img_name + '.txt'))
             boxn = box.readlines()   
@@ -173,6 +174,12 @@ class data_Preprocess(object):
         cv2.destroyAllWindows()
     
 if __name__=='__main__':
+    
+    img_path='/media/lsk/TOSHIBA EXT/kai/education/image'
+    results_path='/home/lsk/Downloads/education/results/education-yolo-1226/test/image'
+    write_path='/media/lsk/TOSHIBA EXT/kai/education/crop'
+    data_Preprocess.crop_from_image(img_path, results_path, write_path)
+    
     '''
     orig_path='/home/lsk/Downloads/education/images/label1213/crop/read'
     dest_path='/home/lsk/Downloads/pytorch_cv/data/education/train_set/None'
@@ -183,6 +190,8 @@ if __name__=='__main__':
     data_Preprocess.label_image(data_dir)
     data_Preprocess.partition_data(data_dir)
     '''
+    '''
     video_path='/home/lsk/Downloads/pytorch_cv/data/education/videos/2.mp4'
     write_path='/home/lsk/Downloads/pytorch_cv/data/education/frame'
     data_Preprocess.select_frame(video_path, write_path, 15, 1860)
+    '''
